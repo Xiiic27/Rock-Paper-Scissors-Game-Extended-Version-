@@ -1,0 +1,94 @@
+# An extended version of Rock-Paper-Scissors-Game
+import random
+rating = 0
+# default play list
+play_list = ['scissors', 'rock', 'paper']
+
+
+# Get the option list provided by users
+def get_list():
+    global play_list
+    options = input()
+    if options != '':
+        play_list = options.split(',')
+    print("Okay, let's start")
+
+
+# Get user's play record from a txt file if he/she has played this game before
+def get_record():
+    global rating
+    name = input('Enter your name: ')
+    print('Hello, ' + name)
+    r_file = open('rating.txt', 'r')
+    name_list = []
+    score_list = []
+    for line in r_file:
+        name_list.append(line.split()[0])
+        score_list.append(line.split()[1].replace('\n', ''))
+    if name in name_list:
+        rating = int(score_list[name_list.index(name)])
+    r_file.close()
+
+
+# With the given option list, for each option find which options can defeat it,
+# these options will be stored in the defined corresponding win_list
+def win_info(choice):
+    global play_list
+    mark_index = play_list.index(choice)
+    len_list = len(play_list)
+# Situation A: when length of the given list is an odd number
+    if len_list % 2 == 1:
+        if mark_index <= len_list // 2:
+            win_list = play_list[mark_index + 1:mark_index + len_list // 2 + 1]
+        else:
+            win_list = play_list[mark_index + 1:] + play_list[:mark_index - len_list // 2]
+# Situation B: when length of the given list is an even number
+    else:
+        if mark_index <= len_list // 2:
+            win_list = play_list[mark_index + 1:mark_index + len_list // 2]
+        else:
+            win_list = play_list[mark_index + 1:] + play_list[:mark_index - len_list // 2 + 2]
+    return win_list
+
+
+# Compare user's choice with computer's random choice.
+# if they are identical, then there is a draw, the user receives 50 points
+# if computer's random choice is in the win list of user's choice, then computer wins
+# else, the user wins and receives 100 points
+def game(choice):
+    global rating, play_list
+    computer_option = random.choice(play_list)
+    if computer_option == choice:
+        print(f'There is a draw ({computer_option})')
+        rating += 50
+    elif computer_option in win_info(choice):
+        print(f'Sorry, but the computer chose {computer_option}')
+    else:
+        print(f'Well done. The computer chose {computer_option} and failed')
+        rating += 100
+
+
+# The game will continue to be played until the user types to exit
+# The program is also able to display the rating of the user and notice the user if he/she typed the wrong word
+def play_cycle():
+    global play_list
+    while True:
+        user_input = input()
+        if user_input == '!exit':
+            print('Bye!')
+            break
+        elif user_input in play_list:
+            game(user_input)
+        elif user_input == '!rating':
+            print(f'Your rating: {rating}')
+        else:
+            print('Invalid input')
+
+
+def main():
+    get_record()
+    get_list()
+    play_cycle()
+
+
+main()
